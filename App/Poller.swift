@@ -19,6 +19,19 @@ final class Poller {
     var isRunning: Bool { task != nil }
     var token = ""
 
+    /// When this install stops opening: read from the provisioning profile the signer embedded.
+    static let signExpires: String? = {
+        guard let url = Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision"),
+              let data = try? Data(contentsOf: url),
+              let start = data.range(of: Data("<?xml".utf8)),
+              let end = data.range(of: Data("</plist>".utf8)),
+              let plist = try? PropertyListSerialization.propertyList(
+                from: data.subdata(in: start.lowerBound..<end.upperBound), format: nil) as? [String: Any],
+              let date = plist["ExpirationDate"] as? Date
+        else { return nil }
+        return ISO8601DateFormatter().string(from: date)
+    }()
+
     func start(base: URL, presence: @escaping Presence, onAnswer: @escaping (PollResponse) -> Void,
                onError: @escaping (String) -> Void) {
         guard task == nil else { return }
@@ -52,6 +65,7 @@ final class Poller {
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = TimeInterval(Self.wait + 15)
         if !token.isEmpty { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        if let expires = Self.signExpires { request.setValue(expires, forHTTPHeaderField: "X-Sign-Expires") }
         request.setValue(presence.background ? "background" : "foreground", forHTTPHeaderField: "X-Presence")
         request.setValue(presence.standby ? "on" : "off", forHTTPHeaderField: "X-Standby")
         let (data, response) = try await session.data(for: request)
