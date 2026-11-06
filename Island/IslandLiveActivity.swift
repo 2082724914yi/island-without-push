@@ -18,7 +18,8 @@ struct IslandLiveActivity: Widget {
     static let wideScale: CGFloat = 2
     /// The minimal island (another app's activity sits beside ours, so each gets a small circle)
     /// shows a window around the sprite's middle.
-    static let minimalCrop = PixelCrop(x: 6, y: 6, w: 22, h: 20)
+    /// The right-hand furniture of her scene, shown beside the sprite on the compact island.
+    static let furnitureCrop = PixelCrop(x: 75, y: 20, w: 22, h: 27)
 
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: IslandAttributes.self) { context in
@@ -42,12 +43,10 @@ struct IslandLiveActivity: Widget {
             } compactLeading: {
                 SpriteView(state: sprite, scale: IslandLiveActivity.compactScale, gray: stale).padding(.leading, 2)
             } compactTrailing: {
-                Circle()
-                    .fill(stale ? Color.gray : SpriteState.onlineGreen)
-                    .frame(width: 6, height: 6)
-                    .padding(.trailing, 4)
+                SpriteView(state: sprite, wide: true, scale: 1, gray: stale, crop: IslandLiveActivity.furnitureCrop)
+                    .padding(.trailing, 2)
             } minimal: {
-                SpriteView(state: sprite, scale: 1, gray: stale, crop: IslandLiveActivity.minimalCrop)
+                SpriteView(state: sprite, scale: 2.0 / 3.0, gray: stale)
             }
         }
     }
