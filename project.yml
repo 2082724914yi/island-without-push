@@ -25,12 +25,12 @@ targets:
       - sdk: ActivityKit.framework
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: dev.example.islanddemo
+        PRODUCT_BUNDLE_IDENTIFIER: com.xiaoyi.island
         GENERATE_INFOPLIST_FILE: NO
     info:
       path: App/Info.plist
       properties:
-        CFBundleDisplayName: IslandDemo
+        CFBundleDisplayName: 小衍
         CFBundleExecutable: $(EXECUTABLE_NAME)
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
         CFBundleInfoDictionaryVersion: "6.0"
@@ -60,12 +60,12 @@ targets:
       - sdk: ActivityKit.framework
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: dev.example.islanddemo.island
+        PRODUCT_BUNDLE_IDENTIFIER: com.xiaoyi.island.widget
         GENERATE_INFOPLIST_FILE: NO
     info:
       path: Island/Info.plist
       properties:
-        CFBundleDisplayName: IslandDemo
+        CFBundleDisplayName: 小衍
         CFBundleExecutable: $(EXECUTABLE_NAME)
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
         CFBundleInfoDictionaryVersion: "6.0"

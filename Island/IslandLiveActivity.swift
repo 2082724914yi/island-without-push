@@ -18,7 +18,7 @@ struct IslandLiveActivity: Widget {
     static let wideScale: CGFloat = 2
     /// The minimal island (another app's activity sits beside ours, so each gets a small circle)
     /// shows a window around the sprite's middle.
-    static let minimalCrop = PixelCrop(x: 5, y: 3, w: 20, h: 18)
+    static let minimalCrop = PixelCrop(x: 4, y: 3, w: 20, h: 18)
 
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: IslandAttributes.self) { context in

@@ -26,6 +26,9 @@ final class AppModel: ObservableObject {
     @Published var serverURL: String {
         didSet { UserDefaults.standard.set(serverURL, forKey: "server.url"); restartPoll() }
     }
+    @Published var serverToken: String {
+        didSet { UserDefaults.standard.set(serverToken, forKey: "server.token"); restartPoll() }
+    }
     @Published var standbyEnabled: Bool {
         didSet { UserDefaults.standard.set(standbyEnabled, forKey: "standby.enabled"); updateReception() }
     }
@@ -43,7 +46,8 @@ final class AppModel: ObservableObject {
     private var interrupted = false
 
     init() {
-        serverURL = UserDefaults.standard.string(forKey: "server.url") ?? "http://192.168.1.2:8787"
+        serverURL = UserDefaults.standard.string(forKey: "server.url") ?? ""
+        serverToken = UserDefaults.standard.string(forKey: "server.token") ?? ""
         standbyEnabled = UserDefaults.standard.object(forKey: "standby.enabled") as? Bool ?? true
         island = IslandController(inputs: { [weak self] in
             guard let self else { return (false, false) }
@@ -110,6 +114,7 @@ final class AppModel: ObservableObject {
         }
         guard !poller.isRunning else { return }
         pollStatus = "连接中"
+        poller.token = serverToken.trimmingCharacters(in: .whitespacesAndNewlines)
         poller.start(base: base, presence: { [weak self] in
             guard let self else { return (true, false) }
             return (self.scenePhase != .active, self.standby.isPlaying)
@@ -148,8 +153,11 @@ struct ContentView: View {
         NavigationStack {
             Form {
                 Section("服务器") {
-                    TextField("http://主机:8787", text: $model.serverURL)
+                    TextField("服务器地址", text: $model.serverURL)
                         .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    SecureField("钥匙", text: $model.serverToken)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                     Text("App 会一直对 /status?wait=20 发长轮询。server/demo_server.py 就是一个最小的例子。")

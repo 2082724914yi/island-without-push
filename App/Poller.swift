@@ -17,6 +17,7 @@ final class Poller {
     }()
     private var task: Task<Void, Never>?
     var isRunning: Bool { task != nil }
+    var token = ""
 
     func start(base: URL, presence: @escaping Presence, onAnswer: @escaping (PollResponse) -> Void,
                onError: @escaping (String) -> Void) {
@@ -50,6 +51,7 @@ final class Poller {
         var request = URLRequest(url: components.url!)
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = TimeInterval(Self.wait + 15)
+        if !token.isEmpty { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
         request.setValue(presence.background ? "background" : "foreground", forHTTPHeaderField: "X-Presence")
         request.setValue(presence.standby ? "on" : "off", forHTTPHeaderField: "X-Standby")
         let (data, response) = try await session.data(for: request)
