@@ -1,3 +1,4 @@
+import ObjectiveC
 import SwiftUI
 import UIKit
 import WebKit
@@ -40,6 +41,28 @@ struct RootView: View {
     }
 }
 
+/// The web content view supplies the arrows-and-Done bar above the keyboard. Swap it for a subclass
+/// that supplies nothing, since the chat page has its own composer.
+final class ChatWKWebView: WKWebView {
+    func hideKeyboardBar() {
+        guard let content = scrollView.subviews.first(where: { String(describing: type(of: $0)).hasPrefix("WKContent") })
+        else { return }
+        let base: AnyClass = type(of: content)
+        let name = "\(NSStringFromClass(base))_NoBar"
+        var bare: AnyClass? = NSClassFromString(name)
+        if bare == nil, let made = objc_allocateClassPair(base, name, 0) {
+            let selector = #selector(getter: UIResponder.inputAccessoryView)
+            let nothing: @convention(block) (AnyObject) -> UIView? = { _ in nil }
+            if let method = class_getInstanceMethod(UIResponder.self, selector) {
+                class_addMethod(made, selector, imp_implementationWithBlock(nothing), method_getTypeEncoding(method))
+            }
+            objc_registerClassPair(made)
+            bare = made
+        }
+        if let bare { object_setClass(content, bare) }
+    }
+}
+
 struct ChatWebView: UIViewRepresentable {
     let url: URL
     let reloads: Int
@@ -54,7 +77,8 @@ struct ChatWebView: UIViewRepresentable {
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         config.applicationNameForUserAgent = "XiaoyanShell/1"
-        let web = WKWebView(frame: .zero, configuration: config)
+        let web = ChatWKWebView(frame: .zero, configuration: config)
+        web.hideKeyboardBar()
         web.navigationDelegate = context.coordinator
         web.uiDelegate = context.coordinator
         web.isOpaque = false
