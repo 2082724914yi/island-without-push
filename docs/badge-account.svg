@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="171" height="26" viewBox="0 0 171 26">
+<rect width="171" height="26" rx="13" fill="#f2faf5"/>
+<rect x="102" width="69" height="26" rx="13" fill="#a8d8b9"/>
+<rect x="102" width="13" height="26" fill="#a8d8b9"/>
+<text x="51.0" y="17" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="12" fill="#5c6655">Apple ID</text>
+<text x="136.5" y="17" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="12" font-weight="600" fill="#ffffff">免费的就行</text>
+</svg>

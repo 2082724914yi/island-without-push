@@ -1,5 +1,5 @@
 # XcodeGen spec. `xcodegen generate` writes IslandDemo.xcodeproj; CI does that on a macOS runner and
-# builds an UNSIGNED IPA, which you sign on your own computer with a free Apple ID (Sideloadly, AltStore…).
+# builds an UNSIGNED IPA, which you sign on your own computer with a free Apple ID (iLoader).
 # Change the two bundle identifiers to your own before building.
 name: IslandDemo
 options:

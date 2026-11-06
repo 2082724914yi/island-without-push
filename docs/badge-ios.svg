@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="138" height="26" viewBox="0 0 138 26">
+<rect width="138" height="26" rx="13" fill="#f4f9fc"/>
+<rect x="47" width="91" height="26" rx="13" fill="#8fbcd4"/>
+<rect x="47" width="13" height="26" fill="#8fbcd4"/>
+<text x="23.5" y="17" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="12" fill="#5c6655">iOS</text>
+<text x="92.5" y="17" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="12" font-weight="600" fill="#ffffff">16.2 以上</text>
+</svg>
