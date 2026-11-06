@@ -12,7 +12,7 @@ struct IslandDemoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(model: model)
+            RootView(model: model)
                 .onAppear { Notices.shared.requestOnce() }
         }
         .onChange(of: scenePhase) { phase in model.scene(phase) }
@@ -80,6 +80,14 @@ final class AppModel: ObservableObject {
     func preview(_ state: SpriteState) {
         island.showPreview(state.rawValue)
         islandStatus = island.status
+    }
+
+    /// The chat page lives at the root of the same host as the island endpoint.
+    var chatURL: URL? {
+        guard !serverToken.isEmpty, let base = baseURL, var parts = URLComponents(url: base, resolvingAgainstBaseURL: false)
+        else { return nil }
+        parts.path = "/"
+        return parts.url
     }
 
     private var baseURL: URL? {
@@ -160,7 +168,7 @@ struct ContentView: View {
                     SecureField("钥匙", text: $model.serverToken)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                    Text("App 会一直对 /status?wait=20 发长轮询。server/demo_server.py 就是一个最小的例子。")
+                    Text("聊天页上两根手指连点两下，就回到这里。")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section("后台") {
@@ -171,9 +179,11 @@ struct ContentView: View {
                 Section("岛") {
                     LabeledContent("状态", value: model.islandStatus)
                     LabeledContent("这一句", value: model.lastLine)
-                    HStack {
-                        ForEach(SpriteState.allCases, id: \.self) { state in
-                            Button(state.rawValue) { model.preview(state) }.buttonStyle(.bordered)
+                    ScrollView(.horizontal) {
+                        HStack {
+                            ForEach(SpriteState.allCases, id: \.self) { state in
+                                Button(state.rawValue) { model.preview(state) }.buttonStyle(.bordered)
+                            }
                         }
                     }
                     Text("点一个预览，然后上滑回桌面：岛只在 App 外面显示，10 秒后恢复服务器给的状态。")
@@ -190,7 +200,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("Island without push")
+            .navigationTitle("小衍设置")
         }
     }
 }

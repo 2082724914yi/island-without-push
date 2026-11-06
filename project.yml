@@ -43,6 +43,10 @@ targets:
         # The two keys the whole trick rests on: Live Activities, and audio in the background.
         NSSupportsLiveActivities: true
         UIBackgroundModes: [audio]
+        NSMicrophoneUsageDescription: 跟小衍说话时用麦克风
+        NSCameraUsageDescription: 拍照发给小衍
+        NSPhotoLibraryUsageDescription: 选照片发给小衍
+        NSPhotoLibraryAddUsageDescription: 把图片存到相册
         # The demo server speaks plain http on your LAN; drop this when you only use https.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
