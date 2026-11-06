@@ -1,0 +1,72 @@
+name: Build unsigned IPA
+
+on:
+  workflow_dispatch:
+    inputs:
+      compile_only:
+        description: Build and check without packaging an IPA
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate
+      - name: Check the pixel art is in sync with Shared/PixelArt.swift
+        run: |
+          cp Shared/PixelArt.swift /tmp/PixelArt.committed.swift
+          python3 tools/make_pixel_art.py
+          diff -q /tmp/PixelArt.committed.swift Shared/PixelArt.swift
+      - name: Standby lifecycle checks
+        run: |
+          swiftc App/Standby.swift Tests/StandbyTests.swift -o /tmp/standby-checks
+          /tmp/standby-checks
+      - name: Poll answer decoding checks
+        run: |
+          swiftc App/PollModels.swift Tests/PollModelsTests.swift -o /tmp/poll-checks
+          /tmp/poll-checks
+      - name: Build unsigned iPhone app
+        run: |
+          xcodebuild \
+            -project IslandDemo.xcodeproj \
+            -scheme IslandDemo \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$PWD/build/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build
+      - name: Check the island extension and the two Info.plist keys
+        run: |
+          APP=build/DerivedData/Build/Products/Release-iphoneos/IslandDemo.app
+          test "$(/usr/libexec/PlistBuddy -c 'Print :NSSupportsLiveActivities' "$APP/Info.plist")" = true
+          /usr/libexec/PlistBuddy -c 'Print :UIBackgroundModes' "$APP/Info.plist" | grep -q audio
+          EXT="$APP/PlugIns/IslandDemoIsland.appex"
+          test -d "$EXT"
+          test -x "$EXT/IslandDemoIsland"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :NSExtension:NSExtensionPointIdentifier' "$EXT/Info.plist")" = com.apple.widgetkit-extension
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$EXT/Info.plist")" = "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")"
+          echo "Island extension embedded; NSSupportsLiveActivities and the audio background mode are set"
+      - name: Package IPA for local signing
+        if: ${{ !inputs.compile_only }}
+        run: |
+          mkdir -p build/Payload
+          cp -R build/DerivedData/Build/Products/Release-iphoneos/IslandDemo.app build/Payload/
+          (cd build && zip -qyr IslandDemo-unsigned.ipa Payload)
+      - uses: actions/upload-artifact@v4
+        if: ${{ !inputs.compile_only }}
+        with:
+          name: IslandDemo-unsigned
+          path: build/IslandDemo-unsigned.ipa
+          if-no-files-found: error

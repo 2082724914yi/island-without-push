@@ -1,0 +1,87 @@
+# XcodeGen spec. `xcodegen generate` writes IslandDemo.xcodeproj; CI does that on a macOS runner and
+# builds an UNSIGNED IPA, which you sign on your own computer with a free Apple ID (Sideloadly, AltStore…).
+# Change the two bundle identifiers to your own before building.
+name: IslandDemo
+options:
+  bundleIdPrefix: dev.example
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1"
+targets:
+  IslandDemo:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.2"
+    sources:
+      - path: App
+      - path: Shared
+    dependencies:
+      # The Live Activity extension, embedded in IslandDemo.app/PlugIns. With a free Apple ID it is a
+      # second App ID (free accounts get 10 App IDs per 7 days).
+      - target: IslandDemoIsland
+      - sdk: ActivityKit.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.example.islanddemo
+        GENERATE_INFOPLIST_FILE: NO
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: IslandDemo
+        CFBundleExecutable: $(EXECUTABLE_NAME)
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleInfoDictionaryVersion: "6.0"
+        CFBundleName: $(PRODUCT_NAME)
+        CFBundlePackageType: APPL
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSRequiresIPhoneOS: true
+        # The two keys the whole trick rests on: Live Activities, and audio in the background.
+        NSSupportsLiveActivities: true
+        UIBackgroundModes: [audio]
+        # The demo server speaks plain http on your LAN; drop this when you only use https.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        UILaunchScreen: {}
+        UIRequiredDeviceCapabilities: [arm64]
+  IslandDemoIsland:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "16.2"
+    sources:
+      - path: Island
+      - path: Shared
+    dependencies:
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+      - sdk: ActivityKit.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.example.islanddemo.island
+        GENERATE_INFOPLIST_FILE: NO
+    info:
+      path: Island/Info.plist
+      properties:
+        CFBundleDisplayName: IslandDemo
+        CFBundleExecutable: $(EXECUTABLE_NAME)
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleInfoDictionaryVersion: "6.0"
+        CFBundleName: $(PRODUCT_NAME)
+        CFBundlePackageType: $(PRODUCT_BUNDLE_PACKAGE_TYPE)
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+
+schemes:
+  IslandDemo:
+    build:
+      targets:
+        IslandDemo: all
+    run:
+      config: Debug
+    archive:
+      config: Release
