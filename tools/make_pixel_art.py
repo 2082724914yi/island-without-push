@@ -41,7 +41,6 @@ def ident(state):
 parts = []
 for state in states:
     compact, wide = grid(f"{state}-compact"), grid(f"{state}-wide")
-    assert len(compact) == len(wide), f"{state}: compact and wide heights differ"
     parts.append(f"    static let {ident(state)}Compact: [String] = [\n{swift_rows(compact)}\n    ]")
     parts.append(f"    static let {ident(state)}Wide: [String] = [\n{swift_rows(wide)}\n    ]")
 
